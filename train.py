@@ -7,8 +7,9 @@ import json
 from torch.utils.data import DataLoader
 import torch.optim as optim
 import torch.nn as nn
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from dataset import VentilatorDataset
+from dataset import VentilatorDatasetMLP, VentilatorDatasetLSTM
 from models.lstm import LSTM
 from models.transformer import Transformer
 from models.mlp import MLP
@@ -20,7 +21,7 @@ parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--epochs', type=int, default=50)
 parser.add_argument('--model', type=str, default='mlp', choices=['lstm', 'transformer', 'mlp'])
 parser.add_argument('--data_path', type=str, default='./data/train.csv')
-parser.add_argument('--split_path', type=str, default='./data/split.json')
+parser.add_argument('--split_path', type=str, default='./data/split_breath_id.json')
 
 
 args = parser.parse_args()
@@ -37,10 +38,35 @@ if not os.path.isdir(saving_dir):
 with open(os.path.join(saving_dir, 'config.txt'), 'w') as f:
     json.dump(args.__dict__, f, indent=2)
 
+
+criterion = nn.MSELoss()
+l1_loss = nn.L1Loss()
+
+split = json.load(open(args.split_path))
+if args.model == 'lstm':
+    VentilatorDataset = VentilatorDatasetLSTM
+elif args.model == 'transformer':
+    VentilatorDataset = VentilatorDatasetLSTM
+elif args.model == 'mlp':
+    VentilatorDataset = VentilatorDatasetMLP
+else:
+    raise NotImplementedError
+
+train_dataset = VentilatorDataset(args.data_path, split['train_idx'], device)
+valid_dataset = VentilatorDataset(args.data_path, split['valid_idx'], device)
+print('train dataset', len(train_dataset))
+print('valid dataset', len(valid_dataset))
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=0)
+valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers=0)
+
+print('train iterations', len(train_loader))
+print('valid iterations', len(valid_loader))
+
 if args.model == 'lstm':
     # net = LSTM(in_features=4, out_features=1)
-    net = nn.LSTM(input_size=4, hidden_size=128, num_layers=1)
-elif args.model == 'tranformer':
+    # net = nn.LSTM(input_size=train_dataset.inputs.shape[-1], hidden_size=128, num_layers=1, batch_first=True)
+    net = LSTM(in_features=train_dataset.inputs.shape[-1], out_features=1)
+elif args.model == 'transformer':
     net = Transformer(in_features=4, out_features=1)
 elif args.model == 'mlp':
     net = MLP(in_features=4, out_features=1)
@@ -48,43 +74,38 @@ else:
     raise NotImplementedError
 
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate)
-
-criterion = nn.MSELoss()
-l1_loss = nn.L1Loss()
-
-split = json.load(open(args.split_path))
-train_dataset = VentilatorDataset(args.data_path, split['train_idx'], device)
-valid_dataset = VentilatorDataset(args.data_path, split['valid_idx'], device)
-
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=0)
-valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers=0)
-
-print('train iterations', len(train_loader))
-print('valid iterations', len(valid_loader))
+scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=2)
 
 for epoch in range(args.epochs):
+    total_error = 0
     net.train()
     for i, (inputs, target) in enumerate(train_loader):
         optimizer.zero_grad()
-        output = net(inputs)
-        loss = criterion(output.squeeze(), target)
+        output = net(inputs).squeeze()
+        loss = criterion(output, target)
         loss.backward()
         optimizer.step()
-        if i % 100 == 0:
-            print('Training Epoch {}, Batch {}/{}: Loss: {}'.format(epoch, i, len(train_loader), loss))
 
-    print('Validating')
+        error = l1_loss(output.squeeze(), target)
+        total_error += error
+
+        if i % 100 == 0:
+            print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch, i, len(train_loader), loss, error))
+
+    scheduler.step(total_error/len(train_loader))
+    print('Validating...')
     total_loss = 0
     total_error = 0
     net.eval()
     with torch.no_grad():
         for i, (inputs, target) in enumerate(valid_loader):
             optimizer.zero_grad()
-            output = net(inputs)
-            loss = criterion(output.squeeze(), target)
-            error = l1_loss(output.squeeze(), target)
+            output = net(inputs).squeeze()
+            loss = criterion(output, target)
+            error = l1_loss(output, target)
             total_loss += loss
             total_error += error
+
         print('Validation after Epoch {}: MSE: {}, MAE: {}'.format(epoch,
                                                                    total_loss/len(valid_loader),
                                                                    total_error/len(valid_loader)))
