@@ -65,11 +65,11 @@ print('valid iterations', len(valid_loader))
 if args.model == 'lstm':
     # net = LSTM(in_features=4, out_features=1)
     # net = nn.LSTM(input_size=train_dataset.inputs.shape[-1], hidden_size=128, num_layers=1, batch_first=True)
-    net = LSTM(in_features=train_dataset.inputs.shape[-1], out_features=1)
+    net = LSTM(in_features=train_dataset.inputs.shape[-1], out_features=1).to(device)
 elif args.model == 'transformer':
-    net = Transformer(in_features=4, out_features=1)
+    net = Transformer(in_features=4, out_features=1).to(device)
 elif args.model == 'mlp':
-    net = MLP(in_features=4, out_features=1)
+    net = MLP(in_features=4, out_features=1).to(device)
 else:
     raise NotImplementedError
 
