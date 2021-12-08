@@ -28,6 +28,7 @@ parser.add_argument('--split_path', type=str, default='./data/split_breath_id.js
 args = parser.parse_args()
 print(args)
 
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using: {}".format(device))
 
@@ -36,6 +37,9 @@ saving_dir = os.path.join('./experiments', str(datetime.datetime.now().strftime(
 if not os.path.isdir(saving_dir):
     os.makedirs(saving_dir)
 print('Saving in:', saving_dir)
+
+with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
+    print(args, file=f)
 
 checkpoint_dir = os.path.join(saving_dir, 'checkpoints')
 if not os.path.isdir(checkpoint_dir):
@@ -102,9 +106,10 @@ for epoch in range(args.epochs):
         # if i % 1000 == 0:
         #     print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch + 1, i, len(train_loader), loss, error))
     print('Epoch {},  Loss: {}'.format(epoch + 1, total_loss/len(train_loader)))
+    with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
+        print('Epoch {},  Loss: {}'.format(epoch + 1, total_loss/len(train_loader)), file=f)
 
     scheduler.step(total_loss/len(train_loader))
-    print('Validating...')
     total_loss = 0
     # total_error = 0
     best_loss = float('inf')
@@ -120,9 +125,14 @@ for epoch in range(args.epochs):
         avg_loss = total_loss/len(valid_loader)
 
         print('Validation after Epoch {}: Loss: {}'.format(epoch + 1, total_loss/len(valid_loader)))
+        with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
+            print('Validation after Epoch {}: Loss: {}'.format(epoch + 1, total_loss/len(valid_loader)), file=f)
 
         if avg_loss < best_loss:
             print('New best model found, current best loss is:', avg_loss.item())
+            with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
+                print('New best model found, current best loss is:', avg_loss.item(), file=f)
+
             best_loss = avg_loss
             torch.save({
                 'epoch': epoch,
