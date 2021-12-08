@@ -34,7 +34,7 @@ print(args)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using: {}".format(device))
 
-if device is 'cuda':
+if device == 'cuda':
     torch.cuda.manual_seed(args.seed)
 else:
     torch.manual_seed(args.seed)
