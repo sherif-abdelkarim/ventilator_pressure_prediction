@@ -77,20 +77,22 @@ optimizer = optim.Adam(net.parameters(), lr=args.learning_rate)
 scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=2)
 
 for epoch in range(args.epochs):
+    total_loss = 0
     total_error = 0
     net.train()
     for i, (inputs, target) in enumerate(train_loader):
         optimizer.zero_grad()
         output = net(inputs).squeeze(dim=-1)
         loss = criterion(output, target)
+        total_loss = loss.item()
         loss.backward()
         optimizer.step()
 
         error = l1_loss(output, target)
         total_error += error
-
-        if i % 1000 == 0:
-            print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch + 1, i, len(train_loader), loss, error))
+        # if i % 1000 == 0:
+        #     print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch + 1, i, len(train_loader), loss, error))
+    print('Epoch {},  MSE: {}, MAE: {}'.format(epoch + 1, total_loss/len(train_loader), total_error/len(train_loader)))
 
     scheduler.step(total_error/len(train_loader))
     print('Validating...')
