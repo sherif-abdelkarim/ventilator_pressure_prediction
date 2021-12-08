@@ -35,6 +35,10 @@ saving_dir = os.path.join('./experiments', str(datetime.datetime.now().strftime(
 if not os.path.isdir(saving_dir):
     os.makedirs(saving_dir)
 
+checkpoint_dir = os.path.join(saving_dir, 'checkpoints')
+if not os.path.isdir(checkpoint_dir):
+    os.makedirs(checkpoint_dir)
+
 with open(os.path.join(saving_dir, 'config.txt'), 'w') as f:
     json.dump(args.__dict__, f, indent=2)
 
@@ -100,6 +104,7 @@ for epoch in range(args.epochs):
     print('Validating...')
     total_loss = 0
     total_error = 0
+    best_error = float('inf')
     net.eval()
     with torch.no_grad():
         for i, (inputs, target) in enumerate(valid_loader):
@@ -109,7 +114,18 @@ for epoch in range(args.epochs):
             error = l1_loss(output, target)
             total_loss += loss
             total_error += error
+        avg_error = total_error/len(valid_loader)
 
         print('Validation after Epoch {}: MSE: {}, MAE: {}'.format(epoch + 1,
                                                                    total_loss/len(valid_loader),
                                                                    total_error/len(valid_loader)))
+
+        if avg_error < best_error:
+            print('New best model found, current best score is: MAE:', avg_error)
+            best_error = avg_error
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': net.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'score': best_error,
+            }, os.path.join(checkpoint_dir, 'best.ptDict'))
