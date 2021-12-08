@@ -44,7 +44,8 @@ with open(os.path.join(saving_dir, 'config.txt'), 'w') as f:
     json.dump(args.__dict__, f, indent=2)
 
 
-criterion = nn.MSELoss()
+# criterion = nn.MSELoss()
+criterion = nn.L1Loss()
 l1_loss = nn.L1Loss()
 
 split = json.load(open(args.split_path))
@@ -85,7 +86,7 @@ scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=2)
 
 for epoch in range(args.epochs):
     total_loss = 0
-    total_error = 0
+    # total_error = 0
     net.train()
     for i, (inputs, target) in enumerate(train_loader):
         optimizer.zero_grad()
@@ -95,38 +96,36 @@ for epoch in range(args.epochs):
         loss.backward()
         optimizer.step()
 
-        error = l1_loss(output, target)
-        total_error += error
+        # error = l1_loss(output, target)
+        # total_error += error
         # if i % 1000 == 0:
         #     print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch + 1, i, len(train_loader), loss, error))
-    print('Epoch {},  MSE: {}, MAE: {}'.format(epoch + 1, total_loss/len(train_loader), total_error/len(train_loader)))
+    print('Epoch {},  Loss: {}'.format(epoch + 1, total_loss/len(train_loader)))
 
-    scheduler.step(total_error/len(train_loader))
+    scheduler.step(total_loss/len(train_loader))
     print('Validating...')
     total_loss = 0
-    total_error = 0
-    best_error = float('inf')
+    # total_error = 0
+    best_loss = float('inf')
     net.eval()
     with torch.no_grad():
         for i, (inputs, target) in enumerate(valid_loader):
             optimizer.zero_grad()
             output = net(inputs).squeeze(dim=-1)
             loss = criterion(output, target)
-            error = l1_loss(output, target)
+            # error = l1_loss(output, target)
             total_loss += loss
-            total_error += error
-        avg_error = total_error/len(valid_loader)
+            # total_error += error
+        avg_loss = total_loss/len(valid_loader)
 
-        print('Validation after Epoch {}: MSE: {}, MAE: {}'.format(epoch + 1,
-                                                                   total_loss/len(valid_loader),
-                                                                   total_error/len(valid_loader)))
+        print('Validation after Epoch {}: Loss: {}'.format(epoch + 1, total_loss/len(valid_loader)))
 
-        if avg_error < best_error:
-            print('New best model found, current best score is: MAE:', avg_error.item())
-            best_error = avg_error
+        if avg_loss < best_loss:
+            print('New best model found, current best loss is:', avg_loss.item())
+            best_loss = avg_loss
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': net.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
-                'score': best_error,
+                'loss': best_loss,
             }, os.path.join(checkpoint_dir, 'best.ptDict'))
