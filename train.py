@@ -17,6 +17,7 @@ from models.mlp import MLP
 # Read arguments and setup device
 parser = argparse.ArgumentParser(description='Ventilator Pressure Prediciton Project')
 parser.add_argument('--learning_rate', type=float, default=0.01)
+parser.add_argument('--weight_decay', type=float, default=0.0)
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--epochs', type=int, default=50)
 parser.add_argument('--model', type=str, default='mlp', choices=['lstm', 'transformer', 'mlp'])
@@ -81,7 +82,7 @@ elif args.model == 'mlp':
 else:
     raise NotImplementedError
 
-optimizer = optim.Adam(net.parameters(), lr=args.learning_rate)
+optimizer = optim.Adam(net.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=2)
 
 for epoch in range(args.epochs):
