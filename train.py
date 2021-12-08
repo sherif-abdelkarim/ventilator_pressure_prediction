@@ -16,6 +16,7 @@ from models.mlp import MLP
 
 # Read arguments and setup device
 parser = argparse.ArgumentParser(description='Ventilator Pressure Prediciton Project')
+parser.add_argument('--seed', type=int, default=1)
 parser.add_argument('--learning_rate', type=float, default=0.001)
 parser.add_argument('--weight_decay', type=float, default=0.0)
 parser.add_argument('--batch_size', type=int, default=512)
@@ -33,6 +34,10 @@ print(args)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using: {}".format(device))
 
+if device is 'cuda':
+    torch.cuda.manual_seed(args.seed)
+else:
+    torch.manual_seed(args.seed)
 # Creating results/logs saving folder
 saving_dir = os.path.join('./experiments', str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
 if not os.path.isdir(saving_dir):
