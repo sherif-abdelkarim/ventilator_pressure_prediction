@@ -81,12 +81,12 @@ for epoch in range(args.epochs):
     net.train()
     for i, (inputs, target) in enumerate(train_loader):
         optimizer.zero_grad()
-        output = net(inputs).squeeze()
+        output = net(inputs).squeeze(dim=-1)
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
 
-        error = l1_loss(output.squeeze(), target)
+        error = l1_loss(output, target)
         total_error += error
 
         if i % 100 == 0:
@@ -100,7 +100,7 @@ for epoch in range(args.epochs):
     with torch.no_grad():
         for i, (inputs, target) in enumerate(valid_loader):
             optimizer.zero_grad()
-            output = net(inputs).squeeze()
+            output = net(inputs).squeeze(dim=-1)
             loss = criterion(output, target)
             error = l1_loss(output, target)
             total_loss += loss
