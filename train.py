@@ -89,8 +89,8 @@ for epoch in range(args.epochs):
         error = l1_loss(output, target)
         total_error += error
 
-        if i % 100 == 0:
-            print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch, i, len(train_loader), loss, error))
+        if i % 1000 == 0:
+            print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch + 1, i, len(train_loader), loss, error))
 
     scheduler.step(total_error/len(train_loader))
     print('Validating...')
@@ -106,6 +106,6 @@ for epoch in range(args.epochs):
             total_loss += loss
             total_error += error
 
-        print('Validation after Epoch {}: MSE: {}, MAE: {}'.format(epoch,
+        print('Validation after Epoch {}: MSE: {}, MAE: {}'.format(epoch + 1,
                                                                    total_loss/len(valid_loader),
                                                                    total_error/len(valid_loader)))
