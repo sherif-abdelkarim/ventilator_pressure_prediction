@@ -34,6 +34,7 @@ print("Using: {}".format(device))
 saving_dir = os.path.join('./experiments', str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
 if not os.path.isdir(saving_dir):
     os.makedirs(saving_dir)
+print('Saving in:', saving_dir)
 
 checkpoint_dir = os.path.join(saving_dir, 'checkpoints')
 if not os.path.isdir(checkpoint_dir):
@@ -121,7 +122,7 @@ for epoch in range(args.epochs):
                                                                    total_error/len(valid_loader)))
 
         if avg_error < best_error:
-            print('New best model found, current best score is: MAE:', avg_error)
+            print('New best model found, current best score is: MAE:', avg_error.item())
             best_error = avg_error
             torch.save({
                 'epoch': epoch,
