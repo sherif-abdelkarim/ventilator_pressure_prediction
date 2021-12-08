@@ -9,6 +9,7 @@ class MLP(nn.Module):
             nn.Linear(in_features, hidden_features),
             nn.Linear(hidden_features, out_features),
         )
+
     def forward(self, x):
         out = self.mlp(x)
         # out = nn.functional.sigmoid(out)

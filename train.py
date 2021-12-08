@@ -20,7 +20,7 @@ parser.add_argument('--learning_rate', type=float, default=0.01)
 parser.add_argument('--weight_decay', type=float, default=0.0)
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--epochs', type=int, default=50)
-parser.add_argument('--model', type=str, default='mlp', choices=['lstm', 'transformer', 'mlp'])
+parser.add_argument('--model', type=str, default='mlp', choices=['lstm', 'bi_lstm', 'transformer', 'mlp'])
 parser.add_argument('--data_path', type=str, default='./data/train.csv')
 parser.add_argument('--split_path', type=str, default='./data/split_breath_id.json')
 
@@ -78,7 +78,9 @@ print('valid iterations', len(valid_loader))
 if args.model == 'lstm':
     # net = LSTM(in_features=4, out_features=1)
     # net = nn.LSTM(input_size=train_dataset.inputs.shape[-1], hidden_size=128, num_layers=1, batch_first=True)
-    net = LSTM(in_features=train_dataset.inputs.shape[-1], out_features=1).to(device)
+    net = LSTM(in_features=train_dataset.inputs.shape[-1], bidirectional=False, out_features=1).to(device)
+elif args.model == 'bi_lstm':
+    net = LSTM(in_features=train_dataset.inputs.shape[-1], bidirectional=True, out_features=1).to(device)
 elif args.model == 'transformer':
     net = Transformer(in_features=4, out_features=1).to(device)
 elif args.model == 'mlp':
@@ -107,9 +109,9 @@ for epoch in range(args.epochs):
         # if i % 1000 == 0:
         #     print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch + 1, i, len(train_loader), loss, error))
     avg_train_loss = total_train_loss/len(train_loader)
-    print('Epoch {},  Loss: {:.4f}'.format(epoch + 1, avg_train_loss))
+    print('Epoch {}:  Loss: {:.4f}'.format(epoch + 1, avg_train_loss))
     with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
-        print('Epoch {},  Loss: {:.4f}'.format(epoch + 1, avg_train_loss), file=f)
+        print('Epoch {}:  Loss: {:.4f}'.format(epoch + 1, avg_train_loss), file=f)
 
     scheduler.step(avg_train_loss)
     total_valid_loss = 0
