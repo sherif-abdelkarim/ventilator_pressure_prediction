@@ -89,7 +89,7 @@ else:
     raise NotImplementedError
 
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=5)
+scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=10, factor=0.5)
 best_loss = float('inf')
 
 for epoch in range(args.epochs):
