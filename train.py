@@ -105,9 +105,9 @@ for epoch in range(args.epochs):
         # total_error += error
         # if i % 1000 == 0:
         #     print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch + 1, i, len(train_loader), loss, error))
-    print('Epoch {},  Loss: {}'.format(epoch + 1, total_loss/len(train_loader)))
+    print('Epoch {},  Loss: {:.4f}'.format(epoch + 1, total_loss/len(train_loader)))
     with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
-        print('Epoch {},  Loss: {}'.format(epoch + 1, total_loss/len(train_loader)), file=f)
+        print('Epoch {},  Loss: {:.4f}'.format(epoch + 1, total_loss/len(train_loader)), file=f)
 
     scheduler.step(total_loss/len(train_loader))
     total_loss = 0
@@ -124,14 +124,14 @@ for epoch in range(args.epochs):
             # total_error += error
         avg_loss = total_loss/len(valid_loader)
 
-        print('Validation after Epoch {}: Loss: {}'.format(epoch + 1, total_loss/len(valid_loader)))
+        print('Validation after Epoch {}: Loss: {:.4f}'.format(epoch + 1, total_loss/len(valid_loader)))
         with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
-            print('Validation after Epoch {}: Loss: {}'.format(epoch + 1, total_loss/len(valid_loader)), file=f)
+            print('Validation after Epoch {}: Loss: {:.4f}'.format(epoch + 1, total_loss/len(valid_loader)), file=f)
 
         if avg_loss < best_loss:
-            print('New best model found, current best loss is:', avg_loss.item())
+            print('New best model found, current best loss is: {:.4f}'.format(avg_loss.item()))
             with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
-                print('New best model found, current best loss is:', avg_loss.item(), file=f)
+                print('New best model found, current best loss is: {:.4f}'.format(avg_loss.item()), file=f)
 
             best_loss = avg_loss
             torch.save({
