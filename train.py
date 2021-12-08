@@ -19,7 +19,8 @@ parser = argparse.ArgumentParser(description='Ventilator Pressure Prediciton Pro
 parser.add_argument('--learning_rate', type=float, default=0.001)
 parser.add_argument('--weight_decay', type=float, default=0.0)
 parser.add_argument('--batch_size', type=int, default=512)
-parser.add_argument('--epochs', type=int, default=50)
+parser.add_argument('--epochs', type=int, default=300)
+parser.add_argument('--reduce_on_plateau', type=bool, default=False)
 parser.add_argument('--model', type=str, default='mlp', choices=['lstm', 'bi_lstm', 'transformer', 'mlp'])
 parser.add_argument('--data_path', type=str, default='./data/train.csv')
 parser.add_argument('--split_path', type=str, default='./data/split_breath_id.json')
@@ -89,7 +90,8 @@ else:
     raise NotImplementedError
 
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=10, factor=0.5)
+if args.reduce_on_plateau:
+    scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=10, factor=0.5)
 best_loss = float('inf')
 
 for epoch in range(args.epochs):
@@ -113,7 +115,8 @@ for epoch in range(args.epochs):
     with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
         print('Epoch {}:  Loss: {:.4f}'.format(epoch + 1, avg_train_loss), file=f)
 
-    scheduler.step(avg_train_loss)
+    if args.reduce_on_plateau:
+        scheduler.step(avg_train_loss)
     total_valid_loss = 0
     # total_error = 0
     net.eval()
