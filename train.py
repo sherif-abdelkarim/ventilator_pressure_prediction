@@ -87,17 +87,17 @@ else:
     raise NotImplementedError
 
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=2)
+scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=5)
 
 for epoch in range(args.epochs):
-    total_loss = 0
+    total_train_loss = 0
     # total_error = 0
     net.train()
     for i, (inputs, target) in enumerate(train_loader):
         optimizer.zero_grad()
         output = net(inputs).squeeze(dim=-1)
         loss = criterion(output, target)
-        total_loss = loss.item()
+        total_train_loss += loss.item()
         loss.backward()
         optimizer.step()
 
@@ -105,12 +105,13 @@ for epoch in range(args.epochs):
         # total_error += error
         # if i % 1000 == 0:
         #     print('Training Epoch {}, Batch {}/{}: MSE: {}, MAE: {}'.format(epoch + 1, i, len(train_loader), loss, error))
-    print('Epoch {},  Loss: {:.4f}'.format(epoch + 1, total_loss/len(train_loader)))
+    avg_train_loss = total_train_loss/len(train_loader)
+    print('Epoch {},  Loss: {:.4f}'.format(epoch + 1, avg_train_loss))
     with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
-        print('Epoch {},  Loss: {:.4f}'.format(epoch + 1, total_loss/len(train_loader)), file=f)
+        print('Epoch {},  Loss: {:.4f}'.format(epoch + 1, avg_train_loss), file=f)
 
-    scheduler.step(total_loss/len(train_loader))
-    total_loss = 0
+    scheduler.step(avg_train_loss)
+    total_valid_loss = 0
     # total_error = 0
     best_loss = float('inf')
     net.eval()
@@ -120,20 +121,20 @@ for epoch in range(args.epochs):
             output = net(inputs).squeeze(dim=-1)
             loss = criterion(output, target)
             # error = l1_loss(output, target)
-            total_loss += loss
+            total_valid_loss += loss.item()
             # total_error += error
-        avg_loss = total_loss/len(valid_loader)
+        avg_valid_loss = total_valid_loss/len(valid_loader)
 
-        print('Validation after Epoch {}: Loss: {:.4f}'.format(epoch + 1, total_loss/len(valid_loader)))
+        print('Validation after Epoch {}: Loss: {:.4f}'.format(epoch + 1, avg_valid_loss))
         with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
-            print('Validation after Epoch {}: Loss: {:.4f}'.format(epoch + 1, total_loss/len(valid_loader)), file=f)
+            print('Validation after Epoch {}: Loss: {:.4f}'.format(epoch + 1, avg_valid_loss), file=f)
 
-        if avg_loss < best_loss:
-            print('New best model found, current best loss is: {:.4f}'.format(avg_loss.item()))
+        if avg_valid_loss < best_loss:
+            print('New best model found, current best loss is: {:.4f}'.format(avg_valid_loss))
             with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
-                print('New best model found, current best loss is: {:.4f}'.format(avg_loss.item()), file=f)
+                print('New best model found, current best loss is: {:.4f}'.format(avg_valid_loss), file=f)
 
-            best_loss = avg_loss
+            best_loss = avg_valid_loss
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': net.state_dict(),
