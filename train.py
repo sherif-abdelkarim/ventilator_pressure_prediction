@@ -88,6 +88,7 @@ else:
 
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=5)
+best_loss = float('inf')
 
 for epoch in range(args.epochs):
     total_train_loss = 0
@@ -113,7 +114,6 @@ for epoch in range(args.epochs):
     scheduler.step(avg_train_loss)
     total_valid_loss = 0
     # total_error = 0
-    best_loss = float('inf')
     net.eval()
     with torch.no_grad():
         for i, (inputs, target) in enumerate(valid_loader):
