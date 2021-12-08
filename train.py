@@ -54,8 +54,10 @@ else:
 
 train_dataset = VentilatorDataset(args.data_path, split['train_idx'], device)
 valid_dataset = VentilatorDataset(args.data_path, split['valid_idx'], device)
+
 print('train dataset', len(train_dataset))
 print('valid dataset', len(valid_dataset))
+
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=0)
 valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers=0)
 

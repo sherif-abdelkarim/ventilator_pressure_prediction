@@ -12,7 +12,6 @@ class VentilatorDatasetMLP(Dataset):
         self.data['R'] = self.data['R']/50
         self.data['C'] = self.data['C']/50
         self.data['u_in'] = self.data['u_in']/100
-
         self.device = device
 
     def __len__(self):
@@ -27,8 +26,8 @@ class VentilatorDatasetMLP(Dataset):
         input_ = np.stack([R, C, u_in, u_out])
         target = row['pressure']
 
-        input_ = torch.Tensor(input_).float().to(self.device)
-        target = torch.Tensor(target).to(self.device)
+        input_ = torch.tensor(input_).float().to(self.device)
+        target = torch.tensor(target).float().to(self.device)
         return input_, target
 
 
