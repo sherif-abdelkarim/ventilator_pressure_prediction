@@ -154,4 +154,4 @@ for epoch in range(args.epochs):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': best_loss,
             }, os.path.join(checkpoint_dir, 'best.ptDict'))
-print('Training done. Best loss: {:.4f}, at epoch: {:.4f}'.format(best_loss, best_epoch))
+print('Training done. Logs saved in: {} Best loss: {:.4f}, at epoch: {}'.format(saving_dir, best_loss, best_epoch))
