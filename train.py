@@ -97,7 +97,7 @@ else:
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 if args.reduce_on_plateau:
     print('Using ReduceLROnPlateau LR scheduler.')
-    scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=10, factor=0.5)
+    scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=5, factor=0.5)
 best_loss = float('inf')
 best_epoch = -1
 for epoch in range(args.epochs):
