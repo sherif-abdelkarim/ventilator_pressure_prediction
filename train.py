@@ -97,7 +97,7 @@ else:
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 if args.reduce_on_plateau:
     print('Using ReduceLROnPlateau LR scheduler.')
-    scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=5, factor=0.5)
+    scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=10, factor=0.5)
 best_loss = float('inf')
 best_epoch = -1
 for epoch in range(args.epochs):
@@ -121,8 +121,6 @@ for epoch in range(args.epochs):
     with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
         print('Epoch {}:  Loss: {:.4f}'.format(epoch + 1, avg_train_loss), file=f)
 
-    if args.reduce_on_plateau:
-        scheduler.step(avg_train_loss)
     total_valid_loss = 0
     # total_error = 0
     net.eval()
@@ -134,7 +132,10 @@ for epoch in range(args.epochs):
             # error = l1_loss(output, target)
             total_valid_loss += loss.item()
             # total_error += error
+
         avg_valid_loss = total_valid_loss/len(valid_loader)
+        if args.reduce_on_plateau:
+            scheduler.step(avg_valid_loss)
 
         print('Validation after Epoch {}: Loss: {:.4f}'.format(epoch + 1, avg_valid_loss))
         with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
