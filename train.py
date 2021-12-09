@@ -98,7 +98,7 @@ optimizer = optim.Adam(net.parameters(), lr=args.learning_rate, weight_decay=arg
 if args.reduce_on_plateau:
     scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=10, factor=0.5)
 best_loss = float('inf')
-
+best_epoch = -1
 for epoch in range(args.epochs):
     total_train_loss = 0
     # total_error = 0
@@ -145,9 +145,11 @@ for epoch in range(args.epochs):
                 print('New best model found, current best loss is: {:.4f}'.format(avg_valid_loss), file=f)
 
             best_loss = avg_valid_loss
+            best_epoch = epoch
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': net.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': best_loss,
             }, os.path.join(checkpoint_dir, 'best.ptDict'))
+print('Training done. Best loss: {:.4f}, at epoch: {:.4f}'.format(best_loss, best_epoch))
