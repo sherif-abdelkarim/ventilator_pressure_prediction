@@ -21,7 +21,7 @@ parser.add_argument('--learning_rate', type=float, default=0.001)
 parser.add_argument('--weight_decay', type=float, default=0.0)
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--epochs', type=int, default=300)
-parser.add_argument('--reduce_on_plateau', action='store_true', default=False)
+parser.add_argument('--reduce_on_plateau', type=bool, action='store_true', default=False)
 parser.add_argument('--model', type=str, default='mlp', choices=['lstm', 'bi_lstm', 'transformer', 'mlp'])
 parser.add_argument('--data_path', type=str, default='./data/train.csv')
 parser.add_argument('--split_path', type=str, default='./data/split_breath_id.json')
@@ -96,6 +96,7 @@ else:
 
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 if args.reduce_on_plateau:
+    print('Using ReduceLROnPlateau LR scheduler.')
     scheduler = ReduceLROnPlateau(optimizer, verbose=True, patience=10, factor=0.5)
 best_loss = float('inf')
 best_epoch = -1
