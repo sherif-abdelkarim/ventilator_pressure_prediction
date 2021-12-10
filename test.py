@@ -19,6 +19,7 @@ parser = argparse.ArgumentParser(description='Ventilator Pressure Prediciton Pro
 parser.add_argument('--seed', type=int, default=1)
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--model', type=str, default='mlp', choices=['lstm', 'bi_lstm', 'transformer', 'mlp'])
+parser.add_argument('--num_hidden', type=int, default=1)
 parser.add_argument('--path', type=str, required=True)
 parser.add_argument('--data_path', type=str, default='./data/test.csv')
 parser.add_argument('--split_path', type=str, default='./data/split_breath_id.json')
