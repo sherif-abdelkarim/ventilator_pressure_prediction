@@ -18,9 +18,9 @@ class LSTM(nn.Module):
         # self.selu = nn.SELU()
         # self.fc2 = nn.Linear(50, out_features)
 
-        self.lstm = nn.LSTM(in_features, hidden[0],
+        self.lstm1 = nn.LSTM(in_features, hidden[0],
                              batch_first=True, bidirectional=bidirectional)
-        self.lstm = nn.LSTM(mutliplier * hidden[0], hidden[1],
+        self.lstm2 = nn.LSTM(mutliplier * hidden[0], hidden[1],
                              batch_first=True, bidirectional=bidirectional)
         self.fc = nn.Linear(mutliplier * hidden[1], out_features)
 
@@ -32,6 +32,7 @@ class LSTM(nn.Module):
         # x = self.fc1(x)
         # x = self.selu(x)
         # x = self.fc2(x)
-        x, _ = self.lstm(x)
+        x, _ = self.lstm1(x)
+        x, _ = self.lstm2(x)
         x = self.fc(x)
         return x
