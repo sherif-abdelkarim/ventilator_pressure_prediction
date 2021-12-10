@@ -20,13 +20,17 @@ parser.add_argument('--seed', type=int, default=1)
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--model', type=str, default='mlp', choices=['lstm', 'bi_lstm', 'transformer', 'mlp'])
 parser.add_argument('--path', type=str, required=True)
-parser.add_argument('--data_path', type=str, default='./data/train.csv')
+parser.add_argument('--data_path', type=str, default='./data/test.csv')
 parser.add_argument('--split_path', type=str, default='./data/split_breath_id.json')
 
 
 args = parser.parse_args()
 print(args)
+checkpoint = args.path
+saving_dir = os.path.join(*checkpoint.split('/')[:-2])
 
+with open(os.path.join(saving_dir, 'test.txt'), 'a') as f:
+    print(args)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using: {}".format(device))
@@ -36,7 +40,6 @@ if device == 'cuda':
 else:
     torch.manual_seed(args.seed)
 
-checkpoint = args.path
 
 criterion = nn.L1Loss()
 
@@ -70,6 +73,7 @@ elif args.model == 'mlp':
 else:
     raise NotImplementedError
 
+print('Testing..')
 total_test_loss = 0
 net.eval()
 with torch.no_grad():
@@ -79,3 +83,5 @@ with torch.no_grad():
         total_test_loss += loss.item()
     avg_test_loss = total_test_loss/len(test_loader)
 print('Testing done. Loss: {:.4f}'.format(avg_test_loss))
+with open(os.path.join(saving_dir, 'test.txt'), 'a') as f:
+    print('Testing done. Loss: {:.4f}'.format(avg_test_loss), file=f)
