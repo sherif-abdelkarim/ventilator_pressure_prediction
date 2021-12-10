@@ -4,7 +4,7 @@ import torch.nn as nn
 class LSTM(nn.Module):
     def __init__(self, in_features, out_features, bidirectional=False):
         super(LSTM, self).__init__()
-        hidden = [128]
+        hidden = [256, 128]
         mutliplier = 2 if bidirectional else 1
         # self.lstm1 = nn.LSTM(in_features, hidden[0],
         #                      batch_first=True, bidirectional=bidirectional)
@@ -20,7 +20,9 @@ class LSTM(nn.Module):
 
         self.lstm = nn.LSTM(in_features, hidden[0],
                              batch_first=True, bidirectional=bidirectional)
-        self.fc = nn.Linear(mutliplier * hidden[0], out_features)
+        self.lstm = nn.LSTM(mutliplier * hidden[0], hidden[1],
+                             batch_first=True, bidirectional=bidirectional)
+        self.fc = nn.Linear(mutliplier * hidden[1], out_features)
 
     def forward(self, x):
         # x, _ = self.lstm1(x)
