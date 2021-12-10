@@ -56,9 +56,13 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_si
 print('test iterations', len(test_loader))
 
 if args.model == 'lstm':
-    net = LSTM(in_features=test_dataset.inputs.shape[-1], bidirectional=False, out_features=1).to(device)
+    # net = LSTM(in_features=4, out_features=1)
+    # net = nn.LSTM(input_size=train_dataset.inputs.shape[-1], hidden_size=128, num_layers=1, batch_first=True)
+    net = LSTM(in_features=test_dataset.inputs.shape[-1],
+               bidirectional=False, out_features=1, num_hidden=args.num_hidden).to(device)
 elif args.model == 'bi_lstm':
-    net = LSTM(in_features=test_dataset.inputs.shape[-1], bidirectional=True, out_features=1).to(device)
+    net = LSTM(in_features=test_dataset.inputs.shape[-1],
+               bidirectional=True, out_features=1, num_hidden=args.num_hidden).to(device)
 elif args.model == 'transformer':
     net = Transformer(in_features=4, out_features=1).to(device)
 elif args.model == 'mlp':

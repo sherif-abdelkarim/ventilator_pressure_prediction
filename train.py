@@ -23,6 +23,7 @@ parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--epochs', type=int, default=300)
 parser.add_argument('--reduce_on_plateau', action='store_true', default=False)
 parser.add_argument('--model', type=str, default='mlp', choices=['lstm', 'bi_lstm', 'transformer', 'mlp'])
+parser.add_argument('--num_hidden', type=int, default=1)
 parser.add_argument('--data_path', type=str, default='./data/train.csv')
 parser.add_argument('--split_path', type=str, default='./data/split_breath_id.json')
 
@@ -84,9 +85,11 @@ print('valid iterations', len(valid_loader))
 if args.model == 'lstm':
     # net = LSTM(in_features=4, out_features=1)
     # net = nn.LSTM(input_size=train_dataset.inputs.shape[-1], hidden_size=128, num_layers=1, batch_first=True)
-    net = LSTM(in_features=train_dataset.inputs.shape[-1], bidirectional=False, out_features=1).to(device)
+    net = LSTM(in_features=train_dataset.inputs.shape[-1],
+               bidirectional=False, out_features=1, num_hidden=args.num_hidden).to(device)
 elif args.model == 'bi_lstm':
-    net = LSTM(in_features=train_dataset.inputs.shape[-1], bidirectional=True, out_features=1).to(device)
+    net = LSTM(in_features=train_dataset.inputs.shape[-1],
+               bidirectional=True, out_features=1, num_hidden=args.num_hidden).to(device)
 elif args.model == 'transformer':
     net = Transformer(in_features=4, out_features=1).to(device)
 elif args.model == 'mlp':
