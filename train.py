@@ -69,8 +69,8 @@ elif args.model == 'mlp':
 else:
     raise NotImplementedError
 
-train_dataset = VentilatorDataset(args.data_path, split['train_idx'], device)
-valid_dataset = VentilatorDataset(args.data_path, split['valid_idx'], device)
+train_dataset = VentilatorDataset(args.data_path, idx=split['train_idx'], device=device)
+valid_dataset = VentilatorDataset(args.data_path, idx=split['valid_idx'], device=device)
 
 print('train dataset', len(train_dataset))
 print('valid dataset', len(valid_dataset))
@@ -155,3 +155,5 @@ for epoch in range(args.epochs):
                 'loss': best_loss,
             }, os.path.join(checkpoint_dir, 'best.ptDict'))
 print('Training done. Logs saved in: {} Best loss: {:.4f}, at epoch: {}'.format(saving_dir, best_loss, best_epoch))
+with open(os.path.join(saving_dir, 'log.txt'), 'a') as f:
+    print('Training done. Logs saved in: {} Best loss: {:.4f}, at epoch: {}'.format(saving_dir, best_loss, best_epoch), file=f)

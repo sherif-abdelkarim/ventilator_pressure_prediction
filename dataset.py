@@ -6,9 +6,10 @@ from torch.utils.data import Dataset
 
 
 class VentilatorDatasetMLP(Dataset):
-    def __init__(self, annotations_file, idx, device):
+    def __init__(self, annotations_file, idx=None, device='cuda'):
         self.data = pd.read_csv(annotations_file)
-        self.data = self.data.iloc[idx].reset_index(drop=True)
+        if idx is not None:
+            self.data = self.data.iloc[idx].reset_index(drop=True)
         self.data['R'] = self.data['R']/50
         self.data['C'] = self.data['C']/50
         self.data['u_in'] = self.data['u_in']/100
@@ -32,9 +33,10 @@ class VentilatorDatasetMLP(Dataset):
 
 
 class VentilatorDatasetLSTM(Dataset):
-    def __init__(self, annotations_file, idx, device):
+    def __init__(self, annotations_file, idx=None, device='cuda'):
         self.data = pd.read_csv(annotations_file)
-        self.data = self.data.loc[self.data['breath_id'].isin(idx)].reset_index(drop=True)
+        if idx is not None:
+            self.data = self.data.loc[self.data['breath_id'].isin(idx)].reset_index(drop=True)
         self.data['R'] = self.data['R']/50
         self.data['C'] = self.data['C']/50
         self.data['u_in'] = self.data['u_in']/100
