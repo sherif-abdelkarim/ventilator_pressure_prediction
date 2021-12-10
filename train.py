@@ -63,6 +63,8 @@ l1_loss = nn.L1Loss()
 split = json.load(open(args.split_path))
 if args.model == 'lstm':
     VentilatorDataset = VentilatorDatasetLSTM
+if args.model == 'bi_lstm':
+    VentilatorDataset = VentilatorDatasetLSTM
 elif args.model == 'transformer':
     VentilatorDataset = VentilatorDatasetLSTM
 elif args.model == 'mlp':
